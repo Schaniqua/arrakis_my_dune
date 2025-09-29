@@ -29,6 +29,10 @@ require "prototypes.sandworms.attack"
 require "prototypes.sandworms.worm-protection"
 
 
+-- spice prototypes
+require "prototypes.spice.spice-ore"
+
+
 --Machine Prototypes
 require "prototypes.machines.dew-collector"
 require "prototypes.machines.water-condenser"
