@@ -37,103 +37,113 @@ data:extend({{
     }
 }})
 
+
 -- STARTUP SETTING ENABLE MINING VEHICLE RESKIN FOR PLANET ARRAKIS
 local startup_setting_miner_reskin = settings.startup["enable_aai_miners_planet_skin"].value
 if startup_setting_miner_reskin then
-    local earendel_aai_miners_planet_skin = util.table.deepcopy(data.raw["car"]["vehicle-miner-mk5"])
-    earendel_aai_miners_planet_skin.animation = {
-        layers = {{
-            priority = "low",
-            width = 201,
-            height = 172,
-            frame_count = 2,
-            scale = 0.5,
-            direction_count = 64,
-            shift = util.by_pixel(0 + 2, -11.5 + 8.5),
-            animation_speed = 8,
-            max_advance = 0.2,
-            stripes = {{
-                filename = "__base__/graphics/entity/car/car-1.png",
-                width_in_frames = 2,
-                height_in_frames = 11
-            }, {
-                filename = "__base__/graphics/entity/car/car-2.png",
-                width_in_frames = 2,
-                height_in_frames = 11
-            }, {
-                filename = "__base__/graphics/entity/car/car-3.png",
-                width_in_frames = 2,
-                height_in_frames = 11
-            }, {
-                filename = "__base__/graphics/entity/car/car-4.png",
-                width_in_frames = 2,
-                height_in_frames = 11
-            }, {
-                filename = "__base__/graphics/entity/car/car-5.png",
-                width_in_frames = 2,
-                height_in_frames = 11
-            }, {
-                filename = "__base__/graphics/entity/car/car-6.png",
-                width_in_frames = 2,
-                height_in_frames = 9
-            }}
-        }, {
-            priority = "low",
-            width = 199,
-            height = 147,
-            frame_count = 2,
-            apply_runtime_tint = true,
-            scale = 0.5,
-            direction_count = 64,
-            max_advance = 0.2,
-            shift = util.by_pixel(0 + 2, -11 + 8.5),
-            line_length = 1,
-            stripes = util.multiplystripes(2, {{
-                filename = "__base__/graphics/entity/car/car-mask-1.png",
-                width_in_frames = 1,
-                height_in_frames = 13
-            }, {
-                filename = "__base__/graphics/entity/car/car-mask-2.png",
-                width_in_frames = 1,
-                height_in_frames = 13
-            }, {
-                filename = "__base__/graphics/entity/car/car-mask-3.png",
-                width_in_frames = 1,
-                height_in_frames = 13
-            }, {
-                filename = "__base__/graphics/entity/car/car-mask-4.png",
-                width_in_frames = 1,
-                height_in_frames = 13
-            }, {
-                filename = "__base__/graphics/entity/car/car-mask-5.png",
-                width_in_frames = 1,
-                height_in_frames = 12
-            }})
-        }, {
-            priority = "low",
-            width = 114,
-            height = 76,
-            frame_count = 2,
-            draw_as_shadow = true,
-            direction_count = 64,
-            shift = {0.28125, 0.25},
-            max_advance = 0.2,
-            stripes = util.multiplystripes(2, {{
-                filename = "__base__/graphics/entity/car/car-shadow-1.png",
-                width_in_frames = 1,
-                height_in_frames = 22
-            }, {
-                filename = "__base__/graphics/entity/car/car-shadow-2.png",
-                width_in_frames = 1,
-                height_in_frames = 22
-            }, {
-                filename = "__base__/graphics/entity/car/car-shadow-3.png",
-                width_in_frames = 1,
-                height_in_frames = 20
-            }})
-        }}
-    }
+    for i = 1, 5 do
+        local real_suffix = ("-mk" .. i)
+        local suffix = (i > 1) and real_suffix or ""
+        local earendel_aai_miners_planet_skin = util.table.deepcopy(data.raw["car"]["vehicle-miner" .. suffix])
 
-    data:extend({earendel_aai_miners_planet_skin})
+
+
+        -- THIS IS THE MINER ANIMATION FOR MK1-5 --------------------------------------------------------------------
+        -- THIS CURRENTLY IS JUST A COPY PASTE OF THE CAR ANIMATION ANYONE FEEL FREE TO MAKE SOMETHING NICER
+        earendel_aai_miners_planet_skin.animation = {
+            layers = {{
+                priority = "low",
+                width = 201,
+                height = 172,
+                frame_count = 2,
+                scale = 0.5,
+                direction_count = 64,
+                shift = util.by_pixel(0 + 2, -11.5 + 8.5),
+                animation_speed = 8,
+                max_advance = 0.2,
+                stripes = {{
+                    filename = "__base__/graphics/entity/car/car-1.png",
+                    width_in_frames = 2,
+                    height_in_frames = 11
+                }, {
+                    filename = "__base__/graphics/entity/car/car-2.png",
+                    width_in_frames = 2,
+                    height_in_frames = 11
+                }, {
+                    filename = "__base__/graphics/entity/car/car-3.png",
+                    width_in_frames = 2,
+                    height_in_frames = 11
+                }, {
+                    filename = "__base__/graphics/entity/car/car-4.png",
+                    width_in_frames = 2,
+                    height_in_frames = 11
+                }, {
+                    filename = "__base__/graphics/entity/car/car-5.png",
+                    width_in_frames = 2,
+                    height_in_frames = 11
+                }, {
+                    filename = "__base__/graphics/entity/car/car-6.png",
+                    width_in_frames = 2,
+                    height_in_frames = 9
+                }}
+            }, {
+                priority = "low",
+                width = 199,
+                height = 147,
+                frame_count = 2,
+                apply_runtime_tint = true,
+                scale = 0.5,
+                direction_count = 64,
+                max_advance = 0.2,
+                shift = util.by_pixel(0 + 2, -11 + 8.5),
+                line_length = 1,
+                stripes = util.multiplystripes(2, {{
+                    filename = "__base__/graphics/entity/car/car-mask-1.png",
+                    width_in_frames = 1,
+                    height_in_frames = 13
+                }, {
+                    filename = "__base__/graphics/entity/car/car-mask-2.png",
+                    width_in_frames = 1,
+                    height_in_frames = 13
+                }, {
+                    filename = "__base__/graphics/entity/car/car-mask-3.png",
+                    width_in_frames = 1,
+                    height_in_frames = 13
+                }, {
+                    filename = "__base__/graphics/entity/car/car-mask-4.png",
+                    width_in_frames = 1,
+                    height_in_frames = 13
+                }, {
+                    filename = "__base__/graphics/entity/car/car-mask-5.png",
+                    width_in_frames = 1,
+                    height_in_frames = 12
+                }})
+            }, {
+                priority = "low",
+                width = 114,
+                height = 76,
+                frame_count = 2,
+                draw_as_shadow = true,
+                direction_count = 64,
+                shift = {0.28125, 0.25},
+                max_advance = 0.2,
+                stripes = util.multiplystripes(2, {{
+                    filename = "__base__/graphics/entity/car/car-shadow-1.png",
+                    width_in_frames = 1,
+                    height_in_frames = 22
+                }, {
+                    filename = "__base__/graphics/entity/car/car-shadow-2.png",
+                    width_in_frames = 1,
+                    height_in_frames = 22
+                }, {
+                    filename = "__base__/graphics/entity/car/car-shadow-3.png",
+                    width_in_frames = 1,
+                    height_in_frames = 20
+                }})
+            }}
+        }
+        -- THIS IS THE MINER ANIMATION FOR MK1-5 --------------------------------------------------------------------
+        data:extend({earendel_aai_miners_planet_skin})
+    end
 end
 
