@@ -4,7 +4,8 @@ icons = "__arrakis_my_dune__/graphics/icons/"
 -- add this to recipe/entity surface_conditions
 --arrakis_exlusive = {{ property = "temperature-celcius", min = 77, max = 77}},
 
-
+-- require virtual signals for alerts, icons usw.
+require "prototypes.virtual-signals"
 
 --Planet and Environment Prototypes
 require "prototypes.planet.planet-arrakis-map-gen"

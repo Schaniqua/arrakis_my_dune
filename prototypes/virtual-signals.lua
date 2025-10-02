@@ -1,0 +1,23 @@
+data:extend({
+  {
+    --prototype for player custom alert spice blow start
+    type = "virtual-signal",
+    name = "spice-blow-start",
+    icon = "__arrakis_my_dune__/graphics/icons/spice-blow-start.png",
+    icon_size = 64,
+    subgroup = "virtual-signal-color",
+    order = "z[arrakis]"
+  },
+
+  {
+        --prototype for player custom alert spice blow stop
+    type = "virtual-signal",
+    name = "spice-blow-stop",
+    icon = "__arrakis_my_dune__/graphics/icons/spice-blow-stop.png",
+    icon_size = 64,
+    subgroup = "virtual-signal-special",
+    order = "z[arrakis]"
+  }
+
+
+})

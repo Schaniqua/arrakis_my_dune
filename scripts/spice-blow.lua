@@ -21,7 +21,8 @@ script.on_nth_tick(60, function()
         game.print(#storage.arrakis_spice_blows, {
             volume_modifier = 0
         })
-        game.print(storage.arrakis_last_blow .. " and " .. math.random((60 * 60 * LOW_TIME_BLOW), (60 * 60 * HIGH_TIME_BLOW)) .. " tick " .. game.tick, {
+        game.print(storage.arrakis_last_blow .. " and " ..
+                       math.random((60 * 60 * LOW_TIME_BLOW), (60 * 60 * HIGH_TIME_BLOW)) .. " tick " .. game.tick, {
             volume_modifier = 0
         })
 
@@ -52,7 +53,7 @@ script.on_nth_tick(60, function()
                             name = {"spice-ore"},
                             radius = 1
                         }
-                        player.add_alert(alert_entity[1], defines.alert_type.unclaimed_cargo)
+                        player.add_custom_alert(alert_entity[1], { type = "virtual", name = "spice-blow-start" }, {"alerts.spice-blow-start"}, true)
                     end
                 end
                 -----------------------------------------------------------------------------------------
@@ -62,35 +63,32 @@ script.on_nth_tick(60, function()
             ------TRACK EXISTING SPICE BLOWS--------------------------------------------------------------------------------------------------------------------------------
             for i = #storage.arrakis_spice_blows, 1, -1 do
                 if storage.arrakis_spice_blows[i].t_timeout <= game.tick then
-                    
 
-
-
-                    --[[ ALERT NOT YET WORKING
                     -- add an alert to all players on arrakis that a spice blow has been destroyed
                     for _, player in pairs(game.connected_players) do
                         if player.valid and (player.surface.name == "arrakis" or player.name == "_Schaniqua_") then
-                            local alert_entity = game.surfaces["arrakis"].get_tile {
-                                x = storage.arrakis_spice_blows[i].coords.x,
-                                y = storage.arrakis_spice_blows[i].coords.y
+                            local alert_entity = game.surfaces["arrakis"].find_entities_filtered {
+                                position = {storage.arrakis_spice_blows[i].coords.x,
+                                            storage.arrakis_spice_blows[i].coords.y},
+                                name = {"spice-ore"},
+                                radius = 6
                             }
-                            player.add_alert(alert_entity, defines.alert_type.entity_destroyed)
+                            player.add_custom_alert(alert_entity[1], { type = "virtual", name = "spice-blow-stop" }, {"alerts.spice-blow-stop"}, true)
+                            game.surfaces["arrakis"].create_entity{
+                                name = "worm-spawn-animation_with_particles",
+                                position = storage.arrakis_spice_blows[i].coords
+                            }
                         end
                     end
                     -------------------------------------------------------------------------------
-                    --]]
 
+                    -- destroy spice at the worms position
+                    helper.destroy(storage.arrakis_spice_blows[i].coords, 10, "spice-ore")  
                     
                     if #storage.arrakis_spice_blows == 1 then
                         storage.arrakis_last_blow = storage.arrakis_spice_blows[1].t_timeout
                     end
-
                     table.remove(storage.arrakis_spice_blows, i)
-                    
-                    game.print("FOUND TIMED OUT", {
-                        volume_modifier = 0
-                    })
-
                 end
             end
             ----------------------------------------------------------------------------------------------------------------------------------------------------------------
