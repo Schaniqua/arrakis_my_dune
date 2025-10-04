@@ -86,7 +86,7 @@ script.on_nth_tick(60, function()
                     -- destroy spice at the worms position
                     helper.destroy(storage.arrakis_spice_blows[i].coords, 10, "spice-ore")
                     -- destroy safety zone at the worms position
-                    helper.destroy(storage.arrakis_spice_blows[i].coords, 5, "HIDDEN_LIGHTNING_ATTRACTOR")
+                    helper.destroy(storage.arrakis_spice_blows[i].coords, (SPICE_BLOW_SAFETY_ZONE_SIZE + 2), "HIDDEN_LIGHTNING_ATTRACTOR")
                     
                     if #storage.arrakis_spice_blows == 1 then
                         storage.arrakis_last_blow = storage.arrakis_spice_blows[1].t_timeout
