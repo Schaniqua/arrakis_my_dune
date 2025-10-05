@@ -121,7 +121,11 @@ config.lightning_properties = {
     }, {
         type = "prototype",
         string = "substation"
+    }, {
+        type = "prototype",
+        string = "ornithopter_airborn"
     }}
+
 }
 
 return config
