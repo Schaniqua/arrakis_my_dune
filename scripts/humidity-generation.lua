@@ -1,5 +1,5 @@
 local config = require("__arrakis_my_dune__.prototypes.-config")
-
+local TICK_LOOP = 60
 
 local MINIMUM_POLLUTION_FOR_OPERATION = 0.01 --Currently set to produce water only when humidity in chunk > 0.01
 local ADDED_POLLUTION_PER_CHUNK = 0.1
@@ -13,7 +13,7 @@ local ticks = 60 * config.POLLUTION_ADD_INTERVAL_SECONDS
 ---------------------------------------------------
 
 --Run once per second to update water condensators
-script.on_nth_tick(60, function()
+script.on_nth_tick(TICK_LOOP, function()
 
     --Check if Arrakis even exists
     if game.surfaces["arrakis"] then

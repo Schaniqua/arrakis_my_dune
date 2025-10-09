@@ -5,7 +5,7 @@ data:extend({
     name = "spice-blow-start",
     icon = "__arrakis_my_dune__/graphics/icons/spice-blow-start.png",
     icon_size = 64,
-    subgroup = "virtual-signal-color",
+    subgroup = "virtual-signal-special",
     order = "z[arrakis]"
   },
 
@@ -17,7 +17,15 @@ data:extend({
     icon_size = 64,
     subgroup = "virtual-signal-special",
     order = "z[arrakis]"
-  }
-
+  },
+  {
+        --prototype for spice_blow amounts signal
+    type = "virtual-signal",
+    name = "spice-blow-amount",
+    icon = "__arrakis_my_dune__/graphics/icons/spice-blow-stop.png",
+    icon_size = 64,
+    subgroup = "virtual-signal-special",
+    order = "z[arrakis]"
+  },
 
 })

@@ -1,21 +1,32 @@
 local helper = {}
 
--- helper function for counting table size
-function helper.table_count(t)
-    local count = 0
-    if t then
-        for _, _ in pairs(t) do
-            count = count + 1
-        end
-    end
-    return count
+function helper.free_zone_tile(entities)
+    local tile_name = entities[1].name
+    for _, ent in ipairs(entities) do if ent.valid then ent.destroy() end end
+    storage.AAI_ZONES[tile_name].used = false
+    storage.AAI_ZONES[tile_name].reference_position = {}
 end
+
 
 -- helper function for creating a ore patch on the spice blow location
 function helper.create_ore_patch(pos, size, ore, amount)
     local patch_size = size or 5
     local ore = ore or "spice-ore"
     local base_amount = amount or 200
+
+    local zone_tile_to_apply
+    local zone_tiles = {}
+
+    if ore == "spice-ore" then
+        for tile_name, data in pairs(storage.AAI_ZONES) do
+            if not data.used then
+                data.used = true
+                data.reference_position = pos
+                zone_tile_to_apply = tile_name
+                break
+            end
+        end
+    end
 
     for dx = -patch_size, patch_size do
         for dy = -patch_size, patch_size do
@@ -27,17 +38,26 @@ function helper.create_ore_patch(pos, size, ore, amount)
                     force = "neutral",
                     position = {pos.x + dx, pos.y + dy}
                 }
+                if ore == "spice-ore" then
+                    table.insert(zone_tiles, game.surfaces["arrakis"].create_entity {
+                        name = zone_tile_to_apply,
+                        force = "neutral",
+                        position = {pos.x + dx, pos.y + dy}
+                    })
+
+                end
             end
         end
     end
+    if ore == "spice-ore" then return zone_tiles end
 end
+
 
 -- helper function for placing safety zone around designated coordinate
 function helper.create_safety_zone(pos, size)
     local zone_size = size or 3
     local created_entities = {}
     local entity = "HIDDEN_LIGHTNING_ATTRACTOR"
-    game.print("test")
     -- handle size = 0
     if zone_size == 0 then
         -- Just place one attractor in the center
@@ -76,6 +96,7 @@ function helper.create_safety_zone(pos, size)
     return created_entities
 end
 
+
 -- helper function for destroying ore patch
 function helper.destroy(pos, radius, filter)
     local radius = radius or 10
@@ -84,10 +105,9 @@ function helper.destroy(pos, radius, filter)
         name = filter
     }
 
-    for _, entity in pairs(entities) do
-        entity.destroy()
-    end
+    for _, entity in pairs(entities) do entity.destroy() end
 end
+
 
 -- helper function to check if adjecent chunks are generated so i dont place spice blows in the black map zone
 function helper.adjacent_chunks_generated(pos)
@@ -95,12 +115,9 @@ function helper.adjacent_chunks_generated(pos)
     local cy = math.floor(pos.y / 32)
     local offsets = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}
 
-    for _, o in pairs(offsets) do
-        if not game.surfaces["arrakis"].is_chunk_generated({cx + o[1], cy + o[2]}) then
-            return false
-        end
-    end
+    for _, o in pairs(offsets) do if not game.surfaces["arrakis"].is_chunk_generated({cx + o[1], cy + o[2]}) then return false end end
     return true
 end
+
 
 return helper

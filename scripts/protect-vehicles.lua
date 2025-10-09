@@ -1,4 +1,5 @@
 require("scripts.helper-functions")
+local TICK_LOOP = 30
 
 -- prototype names of protected vehicles
 local protected_vehicles = {
@@ -16,9 +17,13 @@ local protected_vehicles = {
 
 local MIN_SPEED_FOR_TARGET = 0.01
 
-script.on_nth_tick(30, function()
+function out_of_range(x, spd)
+    return x < -(spd) or x > spd
+end
+
+script.on_nth_tick(TICK_LOOP, function()
     -- if storage is initialised
-    if storage then
+    if storage and game.surfaces["arrakis"] then
 
         -- read or declare data object to hold vehicle lightning attractors
         storage.vehicle_protectors = storage.vehicle_protectors or {}
@@ -31,7 +36,7 @@ script.on_nth_tick(30, function()
             -- for each existing vehicle on the surface of arrakis
             for _, vehicle in ipairs(vehicles) do
                 -- if vehicle is valid data object
-                if vehicle.valid and vehicle.speed >= MIN_SPEED_FOR_TARGET then
+                if vehicle.valid and out_of_range(vehicle.speed, MIN_SPEED_FOR_TARGET) then
                     -- try to read if vehicle already has an entry in vehicle_protectors
                     local entry = storage.vehicle_protectors[vehicle.unit_number]
                     -- if vehicle has entry and entry is valid lightning attractor luaentity
@@ -66,7 +71,7 @@ script.on_nth_tick(30, function()
             else
                 -- if referenced entity isnt above MIN_SPEED_FOR_TARGET movespeed then remove attractor but leave entry intact so we dont need to search next time
                 local unit_speed = game.get_entity_by_unit_number(unit_number).speed
-                if unit_speed < MIN_SPEED_FOR_TARGET then
+                if not out_of_range(unit_speed, MIN_SPEED_FOR_TARGET) then
                     if storage.vehicle_protectors[unit_number].valid then
                         storage.vehicle_protectors[unit_number].destroy()
                         game.print("destroyer - current speed " .. unit_speed)
