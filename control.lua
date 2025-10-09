@@ -13,7 +13,6 @@ require("scripts.protect-vehicles")
 require("scripts.script-trigger-worm-targeting")
 require("scripts.spice-blow")
 require("scripts.spice-blow-scanning")
-require("scripts.spice-blow-seismicing")
 
 -- language translation for gui elements set at runtime
 require ("scripts.runtime-localisation")

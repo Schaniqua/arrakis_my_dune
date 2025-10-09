@@ -17,6 +17,53 @@ function helper.create_ore_patch(pos, size, ore, amount)
     local zone_tile_to_apply
     local zone_tiles = {}
 
+    storage.AAI_ZONES = storage.AAI_ZONES or {
+        ["zone-box-blue"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-cyan"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-green"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-magenta"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-olive"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-orange"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-purple"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-red"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-teal"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-white"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-yellow"] = {
+            used = false,
+            reference_position = {}
+        }
+    }
+
     if ore == "spice-ore" then
         for tile_name, data in pairs(storage.AAI_ZONES) do
             if not data.used then
