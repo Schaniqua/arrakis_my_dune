@@ -1,58 +1,15 @@
 local helper = {}
 
--- make sure not to use helper-functions before storage is initialized otherwise problems will ensue
-local function check_defined_dict()
-    storage.AAI_ZONES = storage.AAI_ZONES or {
-        ["zone-box-blue"] = {
-            used = false
-        },
-        ["zone-box-cyan"] = {
-            used = false
-        },
-        ["zone-box-green"] = {
-            used = false
-        },
-        ["zone-box-magenta"] = {
-            used = false
-        },
-        ["zone-box-olive"] = {
-            used = false
-        },
-        ["zone-box-orange"] = {
-            used = false
-        },
-        ["zone-box-purple"] = {
-            used = false
-        },
-        ["zone-box-red"] = {
-            used = false
-        },
-        ["zone-box-teal"] = {
-            used = false
-        },
-        ["zone-box-white"] = {
-            used = false
-        },
-        ["zone-box-yellow"] = {
-            used = false
-        }
-    }
-end
-
 function helper.free_zone_tile(entities)
     local tile_name = entities[1].name
-    check_defined_dict()
-    for _, ent in ipairs(entities) do
-        if ent.valid then
-            ent.destroy()
-        end
-    end
+    for _, ent in ipairs(entities) do if ent.valid then ent.destroy() end end
     storage.AAI_ZONES[tile_name].used = false
+    storage.AAI_ZONES[tile_name].reference_position = {}
 end
+
 
 -- helper function for creating a ore patch on the spice blow location
 function helper.create_ore_patch(pos, size, ore, amount)
-    check_defined_dict()
     local patch_size = size or 5
     local ore = ore or "spice-ore"
     local base_amount = amount or 200
@@ -64,12 +21,13 @@ function helper.create_ore_patch(pos, size, ore, amount)
         for tile_name, data in pairs(storage.AAI_ZONES) do
             if not data.used then
                 data.used = true
+                data.reference_position = pos
                 zone_tile_to_apply = tile_name
                 break
             end
         end
     end
-    
+
     for dx = -patch_size, patch_size do
         for dy = -patch_size, patch_size do
             local distance = math.sqrt(dx * dx + dy * dy)
@@ -91,10 +49,9 @@ function helper.create_ore_patch(pos, size, ore, amount)
             end
         end
     end
-    if ore == "spice-ore" then
-        return zone_tiles
-    end
+    if ore == "spice-ore" then return zone_tiles end
 end
+
 
 -- helper function for placing safety zone around designated coordinate
 function helper.create_safety_zone(pos, size)
@@ -139,6 +96,7 @@ function helper.create_safety_zone(pos, size)
     return created_entities
 end
 
+
 -- helper function for destroying ore patch
 function helper.destroy(pos, radius, filter)
     local radius = radius or 10
@@ -147,10 +105,9 @@ function helper.destroy(pos, radius, filter)
         name = filter
     }
 
-    for _, entity in pairs(entities) do
-        entity.destroy()
-    end
+    for _, entity in pairs(entities) do entity.destroy() end
 end
+
 
 -- helper function to check if adjecent chunks are generated so i dont place spice blows in the black map zone
 function helper.adjacent_chunks_generated(pos)
@@ -158,12 +115,9 @@ function helper.adjacent_chunks_generated(pos)
     local cy = math.floor(pos.y / 32)
     local offsets = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}
 
-    for _, o in pairs(offsets) do
-        if not game.surfaces["arrakis"].is_chunk_generated({cx + o[1], cy + o[2]}) then
-            return false
-        end
-    end
+    for _, o in pairs(offsets) do if not game.surfaces["arrakis"].is_chunk_generated({cx + o[1], cy + o[2]}) then return false end end
     return true
 end
+
 
 return helper
