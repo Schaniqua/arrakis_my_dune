@@ -40,7 +40,6 @@ script.on_nth_tick(TICK_LOOP, function()
                 local safety_zone = helper.create_safety_zone(potential_spawn, SPICE_BLOW_SAFETY_ZONE_SIZE)
                 -- generate ore field of spice
                 local zone_tiles = helper.create_ore_patch(potential_spawn, 5, "spice-ore", 100)
-                game.print(zone_tiles[1].name)
                 -- create data object to hold spice blow events
                 local spice_blow = {
                     coords = potential_spawn,

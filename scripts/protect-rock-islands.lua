@@ -3,7 +3,6 @@ script.on_event(defines.events.on_chunk_generated, function(event)
     local surface = event.surface
     -- if not arrakis stop immediately
     if (surface.name == "arrakis") then
-        game.print("Generated Chunk", {volume_modifier = 0})
         -- scan every 8th tile in a grid on the map (non overlapping)
         -- i thought this solution was naive and absolute ass but it works wayyyyy better than i expected
         for x = (area.left_top.x + 4), area.right_bottom.x - 5, 8 do

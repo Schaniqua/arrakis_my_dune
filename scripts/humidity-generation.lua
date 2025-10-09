@@ -17,6 +17,7 @@ script.on_nth_tick(TICK_LOOP, function()
 
     --Check if Arrakis even exists
     if game.surfaces["arrakis"] then
+        -- this is not optimised at all but can be remade later if needed, low hanging fruit changing find_entities to references in memory
         for key, entity in pairs(game.surfaces["arrakis"].find_entities_filtered({name="water-condenser"})) do
             --game.print("test")
             --game.print(key)
