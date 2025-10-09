@@ -6,12 +6,7 @@ local spice_blow_amount = {
     quality = "normal",
     comparator = "="
 }
-local zone_box_blue = {
-    type = "virtual",
-    name = "zone-box-blue",
-    quality = "normal",
-    comparator = "="
-}
+
 
 -- call function on every build event, player and robot
 -- first check if storage table is ready and if data object is ready
