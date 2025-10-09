@@ -1,22 +1,75 @@
 local helper = {}
 
--- helper function for counting table size
-function helper.table_count(t)
-    local count = 0
-    if t then
-        for _, _ in pairs(t) do
-            count = count + 1
+-- make sure not to use helper-functions before storage is initialized otherwise problems will ensue
+local function check_defined_dict()
+    storage.AAI_ZONES = storage.AAI_ZONES or {
+        ["zone-box-blue"] = {
+            used = false
+        },
+        ["zone-box-cyan"] = {
+            used = false
+        },
+        ["zone-box-green"] = {
+            used = false
+        },
+        ["zone-box-magenta"] = {
+            used = false
+        },
+        ["zone-box-olive"] = {
+            used = false
+        },
+        ["zone-box-orange"] = {
+            used = false
+        },
+        ["zone-box-purple"] = {
+            used = false
+        },
+        ["zone-box-red"] = {
+            used = false
+        },
+        ["zone-box-teal"] = {
+            used = false
+        },
+        ["zone-box-white"] = {
+            used = false
+        },
+        ["zone-box-yellow"] = {
+            used = false
+        }
+    }
+end
+
+function helper.free_zone_tile(entities)
+    local tile_name = entities[1].name
+    check_defined_dict()
+    for _, ent in ipairs(entities) do
+        if ent.valid then
+            ent.destroy()
         end
     end
-    return count
+    storage.AAI_ZONES[tile_name].used = false
 end
 
 -- helper function for creating a ore patch on the spice blow location
 function helper.create_ore_patch(pos, size, ore, amount)
+    check_defined_dict()
     local patch_size = size or 5
     local ore = ore or "spice-ore"
     local base_amount = amount or 200
 
+    local zone_tile_to_apply
+    local zone_tiles = {}
+
+    if ore == "spice-ore" then
+        for tile_name, data in pairs(storage.AAI_ZONES) do
+            if not data.used then
+                data.used = true
+                zone_tile_to_apply = tile_name
+                break
+            end
+        end
+    end
+    
     for dx = -patch_size, patch_size do
         for dy = -patch_size, patch_size do
             local distance = math.sqrt(dx * dx + dy * dy)
@@ -27,8 +80,19 @@ function helper.create_ore_patch(pos, size, ore, amount)
                     force = "neutral",
                     position = {pos.x + dx, pos.y + dy}
                 }
+                if ore == "spice-ore" then
+                    table.insert(zone_tiles, game.surfaces["arrakis"].create_entity {
+                        name = zone_tile_to_apply,
+                        force = "neutral",
+                        position = {pos.x + dx, pos.y + dy}
+                    })
+
+                end
             end
         end
+    end
+    if ore == "spice-ore" then
+        return zone_tiles
     end
 end
 
@@ -37,7 +101,6 @@ function helper.create_safety_zone(pos, size)
     local zone_size = size or 3
     local created_entities = {}
     local entity = "HIDDEN_LIGHTNING_ATTRACTOR"
-    game.print("test")
     -- handle size = 0
     if zone_size == 0 then
         -- Just place one attractor in the center

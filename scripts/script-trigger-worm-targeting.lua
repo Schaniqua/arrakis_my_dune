@@ -2,7 +2,7 @@ helper = require("scripts.helper-functions")
 
 -- Script-Trigger when lightning hits something this gets called and executed
 script.on_event("on_script_trigger_effect", function(event)
-
+    storage.arrakis_attack_history = storage.arrakis_attack_history or {}
     -- if random worm attack position got chosen
     if (event.effect_id == "script_trigger_worm_attack") then
 
@@ -18,10 +18,12 @@ script.on_event("on_script_trigger_effect", function(event)
         end
 
         -- print attack location (debug)
+        --[[
         game.print("Attack was triggered on Arrakis at Coordinate X: " .. event.target_position.x .. " Y: " ..
                        event.target_position.y, {
             volume_modifier = 0
         })
+        ]]--
 
     end
 end)

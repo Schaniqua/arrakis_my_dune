@@ -12,3 +12,4 @@ require("scripts.protect-vehicles")
 -- spice blow system
 require("scripts.script-trigger-worm-targeting")
 require("scripts.spice-blow")
+require("scripts.spice-blow-scanning")

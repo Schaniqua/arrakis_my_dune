@@ -5,7 +5,9 @@ icons = "__arrakis_my_dune__/graphics/icons/"
 --arrakis_exlusive = {{ property = "temperature-celcius", min = 77, max = 77}},
 
 -- require virtual signals for alerts, icons usw.
-require "prototypes.virtual-signals"
+require "prototypes.sandworms.virtual-signals"
+require "prototypes.sandworms.seismic-scanner"
+require "prototypes.sandworms.spice-scanner"
 
 --Planet and Environment Prototypes
 require "prototypes.planet.planet-arrakis-map-gen"
