@@ -1,8 +1,12 @@
 local helper = {}
 
-function helper.free_zone_tile(entities)
-    local tile_name = entities[1].name
-    for _, ent in ipairs(entities) do if ent.valid then ent.destroy() end end
+function helper.free_zone_tile(tile_name)
+    if not tile_name then return end
+    local found_entities = game.surfaces["arrakis"].find_entities_filtered {
+        name = tile_name
+    }
+
+    for _, ent in ipairs(found_entities) do if ent and ent.valid then ent.destroy() end end
     storage.AAI_ZONES[tile_name].used = false
     storage.AAI_ZONES[tile_name].reference_position = {}
 end
@@ -13,9 +17,54 @@ function helper.create_ore_patch(pos, size, ore, amount)
     local patch_size = size or 5
     local ore = ore or "spice-ore"
     local base_amount = amount or 200
-
     local zone_tile_to_apply
-    local zone_tiles = {}
+
+    storage.AAI_ZONES = storage.AAI_ZONES or {
+        ["zone-box-blue"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-cyan"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-green"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-magenta"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-olive"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-orange"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-purple"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-red"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-teal"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-white"] = {
+            used = false,
+            reference_position = {}
+        },
+        ["zone-box-yellow"] = {
+            used = false,
+            reference_position = {}
+        }
+    }
 
     if ore == "spice-ore" then
         for tile_name, data in pairs(storage.AAI_ZONES) do
@@ -39,17 +88,16 @@ function helper.create_ore_patch(pos, size, ore, amount)
                     position = {pos.x + dx, pos.y + dy}
                 }
                 if ore == "spice-ore" then
-                    table.insert(zone_tiles, game.surfaces["arrakis"].create_entity {
+                    game.surfaces["arrakis"].create_entity {
                         name = zone_tile_to_apply,
                         force = "neutral",
                         position = {pos.x + dx, pos.y + dy}
-                    })
-
+                    }
                 end
             end
         end
     end
-    if ore == "spice-ore" then return zone_tiles end
+    if ore == "spice-ore" then return zone_tile_to_apply end
 end
 
 
