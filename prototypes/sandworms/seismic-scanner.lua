@@ -2,6 +2,7 @@
 local seismic_scanner = util.table.deepcopy(data.raw["constant-combinator"]["constant-combinator"])
 seismic_scanner.name = "seismic_scanner"
 seismic_scanner.icon = "__base__/graphics/icons/constant-combinator.png"
+seismic_scanner.flags = {"get-by-unit-number"}
 seismic_scanner.minable = {
     mining_time = 0.1,
     result = "seismic_scanner"

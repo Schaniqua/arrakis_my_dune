@@ -13,8 +13,16 @@ script.on_event(defines.events.on_gui_opened, function(event)
                 player = event.player_index
             }
             if entity.combinator_description == "" then player.opened = nil end
-        else
-            -- add other entities to localize at runtime here via elsif entity.name
+        elseif entity.name == "seismic_scanner" then
+            local localised_info = {"info.seismic-scanner-groupinfo"}
+            local translation_id = player.request_translation(localised_info)
+            storage.pending_translations = storage.pending_translations or {}
+            storage.pending_translations[translation_id] = {
+                entity = entity,
+                player = event.player_index
+            }
+            if entity.combinator_description == "" then player.opened = nil end
+            
         end
     end
 end
@@ -24,7 +32,7 @@ script.on_event(defines.events.on_string_translated, function(event)
     local entity = storage.pending_translations and storage.pending_translations[event.id].entity
     local player = storage.pending_translations[event.id].player
     if entity and entity.valid and event.translated then
-        if entity.name == "spice_scanner" then
+        if entity.name == "spice_scanner" or entity.name == "seismic_scanner" then
             entity.combinator_description = event.result
             game.get_player(storage.pending_translations[event.id].player).opened = entity
         else

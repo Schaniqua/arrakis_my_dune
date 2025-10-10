@@ -1,13 +1,30 @@
-local TICK_LOOP_SPICE = 50
-local TICK_LOOP_SEISMIC = 50
+local TICK_LOOP_SPICE = 120
+local TICK_LOOP_SEISMIC = 90
 
+local DETECTION_RADIUS = 30
+local WARNING_TIME = 20
 
 local spice_blow_amount = {
     type = "virtual",
-    name = "spice-blow-amount",
+    name = "spice-blow-start",
     quality = "normal",
     comparator = "="
 }
+
+local spice_blow_danger = {
+    type = "virtual",
+    name = "spice-blow-stop",
+    quality = "normal",
+    comparator = "="
+}
+
+-- calculate distance
+local function distance(pos1, pos2)
+    local dx = pos1.x - pos2.x
+    local dy = pos1.y - pos2.y
+    return math.sqrt(dx * dx + dy * dy)
+end
+
 
 -- this function handles built events for the mod entities
 local function built_event(event)
@@ -17,31 +34,24 @@ local function built_event(event)
         -- handle spice_scanner built
         spice_scanner = function()
             storage.arrakis_spice_scanners = storage.arrakis_spice_scanners or {}
-            table.insert(storage.arrakis_spice_scanners, entity)
+            table.insert(storage.arrakis_spice_scanners, entity.unit_number)
         end
 ,
         -- handle seismic_scanner built
         seismic_scanner = function()
             storage.arrakis_seismic_scanners = storage.arrakis_seismic_scanners or {}
-            table.insert(storage.arrakis_seismic_scanners, entity)
+            table.insert(storage.arrakis_seismic_scanners, entity.unit_number)
         end
 
-    }
 
+    }
     -- Execute handler for built entity if handler exists
     local handler = handlers[entity.name]
     if handler then handler() end
 end
 
 
--- remove scanner entity and table entry
-local function remove_scanner(entity, i)
-    entity.destroy()
-    table.remove(storage.arrakis_spice_scanners, i)
-end
-
-
--- call when player built and when robot built
+-- define on-event player built and robot built
 script.on_event(defines.events.on_built_entity, built_event, {{
     filter = "name",
     name = "spice_scanner"
@@ -64,15 +74,15 @@ script.on_nth_tick(TICK_LOOP_SPICE, function()
     -- go through storage table in reverse order
     for i = #storage.arrakis_spice_scanners, 1, -1 do
         -- try to read spice scanner table entry, remove entity and table entry if not OK
-        local spice_scanner = storage.arrakis_spice_scanners[i]
-        if not spice_scanner.valid then
-            remove_scanner(spice_scanner, i)
+        local spice_scanner = game.get_entity_by_unit_number(storage.arrakis_spice_scanners[i])
+        if not spice_scanner or not spice_scanner.valid then
+            table.remove(storage.arrakis_spice_scanners, i)
             goto EOL
         end
         -- try to read spice scanner control_behavior, remove entity and table entry if not OK
         local control_behavior = spice_scanner.get_or_create_control_behavior()
         if not control_behavior then
-            remove_scanner(spice_scanner, i)
+            table.remove(storage.arrakis_spice_scanners, i)
             goto EOL
         end
 
@@ -96,9 +106,7 @@ script.on_nth_tick(TICK_LOOP_SPICE, function()
         -- collect all used zones with their distances
         for tile_name, data in pairs(storage.AAI_ZONES) do
             if data.used and data.reference_position then
-                local dx = data.reference_position.x - entity_pos.x
-                local dy = data.reference_position.y - entity_pos.y
-                local dist = math.sqrt(dx * dx + dy * dy)
+                local dist = distance(data.reference_position, entity_pos)
                 table.insert(distances, {
                     tile = tile_name,
                     distance = dist
@@ -125,7 +133,8 @@ script.on_nth_tick(TICK_LOOP_SPICE, function()
         end
 
         -- sort by distance (so nearest appear leftmost)
-        table.sort(distances, function(a, b) return a.distance < b.distance end)
+        table.sort(distances, function(a, b) return a.distance < b.distance end
+)
 
         -- populate logi group with active spice blows as virtual signals, signal value is 1-100 distance from scanner to spice blow
         local section = control_behavior.get_section(1)
@@ -142,11 +151,20 @@ script.on_nth_tick(TICK_LOOP_SPICE, function()
             })
         end
 
-        ::EOL:: -- jump to End Of Loop, dont come @ me because i use loops
+        ::EOL:: -- jump to End Of Loop, dont come @ me because i use goto
 
     end
 end
 )
+
+local function get_signal_count(signals, sig_name)
+    if not signals then return nil end
+    for _, entry in pairs(signals) do
+        local sig = entry.signal
+        if sig and sig.name == sig_name then return entry.count end
+    end
+    return nil
+end
 
 
 -- processing loop for seismic scanner logic
@@ -156,36 +174,82 @@ script.on_nth_tick(TICK_LOOP_SEISMIC, function()
     -- go through storage table in reverse order
     for i = #storage.arrakis_seismic_scanners, 1, -1 do
         -- try to read spice scanner table entry, remove entity and table entry if not OK
-        local spice_scanner = storage.arrakis_seismic_scanners[i]
-        if not spice_scanner.valid then
-            remove_scanner(spice_scanner, i)
+        local seismic_scanner = game.get_entity_by_unit_number(storage.arrakis_seismic_scanners[i])
+        if not seismic_scanner or not seismic_scanner.valid then
+            table.remove(storage.arrakis_seismic_scanners, i)
             goto EOL
         end
         -- try to read spice scanner control_behavior, remove entity and table entry if not OK
-        local control_behavior = spice_scanner.get_or_create_control_behavior()
+        local control_behavior = seismic_scanner.get_or_create_control_behavior()
         if not control_behavior then
-            remove_scanner(spice_scanner, i)
+            table.remove(storage.arrakis_seismic_scanners, i)
             goto EOL
         end
 
         -- make changes to the logi_section of the combinator to output number of active spice blows in a logi group
         logi_section = control_behavior.get_section(1)
-        logi_section.group = "SIGNAL OUTPUT"
-        --logi_section.set_slot(1, {
+        -- logi_section.group = "SIGNAL OUTPUT" DO NOT WRITE SAME SIGNAL GROUP TO MULTIPLE SEISMIC SENSORS -> many problems
+        -- logi_section.set_slot(1, {
         --    value = spice_blow_amount,
         --    min = #storage.arrakis_spice_blows
-        --})
+        -- })
 
         -- remove existing signals except the first one (number of active spice blows)
         for i = 1, logi_section.filters_count do logi_section.clear_slot(i) end
 
         -- this is the actual scanning logic ------------------------------------------------------------------------
-        --if not storage.AAI_ZONES then goto EOL end
+
+        -- read vehicle ID from circuit network
+        local UNIT_ID
+        local INPUT_SIGNALS = seismic_scanner.get_signals(defines.wire_connector_id.combinator_input_red, defines.wire_connector_id.combinator_input_green)
+        if INPUT_SIGNALS then
+            UNIT_ID = get_signal_count(INPUT_SIGNALS, "signal-id")
+            game.print(serpent.block(UNIT_ID))
+        else
+            UNIT_ID = 0
+        end
+
+        local AAI_Units = remote.call("aai-programmable-vehicles", "get_units")
+ 
+        goto EOL
+        -- something here is sus, work for tomorrow
+        game.print(serpent.block(AAI_Units, {comment=false}))
+        for i, AAI_UNIT in ipairs(AAI_Units) do
+            if AAI_UNIT.unit_id == UNIT_ID then
+                --game.print(serpent.block(AAI_UNIT))
+                --game.print(AAI_UNIT.vehicle.position)
+            end
+        end
 
         
+        goto EOL
+        
+        
+        local UNIT_REFERENCE = storage.unit.units[UNIT_ID]
+        if UNIT_REFERENCE and UNIT_REFERENCE.valid then
+            game.print(serpent.block("valid reference"))
 
-        ::EOL:: -- jump to End Of Loop, dont come @ me because i use loops
+            for i, spice_blow in ipairs(storage.arrakis_spice_blows) do
+                local t_remaining = spice_blow.t_timeout - (game.tick - spice_blow.t_created)
+                local t_remaining_sec = t_remaining / TICK_LOOP_SEISMIC
 
+                if t_remaining_sec > 0 and t_remaining_sec <= WARNING_TIME then
+                    local dist = distance(UNIT_REFERENCE.position, spice_blow.position)
+                    if dist <= DETECTION_RADIUS then
+                        -- linear scale: 20s -> 0 danger, 0s -> 100 danger
+                        local danger = 100 * (1 - (t_remaining_sec / WARNING_TIME))
+                        if danger > max_danger then max_danger = danger end
+                    end
+                end
+            end
+            -- logi_section.group = "SIGNAL OUTPUT" no group here, group will sync between combinators, we dont want that
+            logi_section.set_slot(1, {
+                value = spice_blow_danger,
+                min = max_danger
+            })
+        end
+
+        ::EOL:: -- jump to End Of Loop, dont come @ me because i use goto
     end
 end
 )

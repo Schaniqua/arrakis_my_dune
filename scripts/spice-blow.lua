@@ -39,12 +39,12 @@ script.on_nth_tick(TICK_LOOP, function()
                 -- place safety zone around spawn coordinates
                 local safety_zone = helper.create_safety_zone(potential_spawn, SPICE_BLOW_SAFETY_ZONE_SIZE)
                 -- generate ore field of spice
-                local zone_tiles = helper.create_ore_patch(potential_spawn, 5, "spice-ore", 100)
+                local zone_tile = helper.create_ore_patch(potential_spawn, 5, "spice-ore", 100)
                 -- create data object to hold spice blow events
                 local spice_blow = {
                     coords = potential_spawn,
                     protectors = safety_zone,
-                    zone_tiles = zone_tiles,
+                    zone_tile = zone_tile,
                     t_created = game.tick,
                     t_timeout = game.tick + math.random((60 * 60 * LOW_TIME_WORM), (60 * 60 * HIGH_TIME_WORM))
                 }
@@ -91,7 +91,7 @@ script.on_nth_tick(TICK_LOOP, function()
                     -- destroy safety zone at the worms position
                     helper.destroy(storage.arrakis_spice_blows[i].coords, (SPICE_BLOW_SAFETY_ZONE_SIZE + 2), "HIDDEN_LIGHTNING_ATTRACTOR")
                     -- destroy AAI zone tiles at the worms position
-                    helper.free_zone_tile(storage.arrakis_spice_blows[i].zone_tiles)
+                    helper.free_zone_tile(storage.arrakis_spice_blows[i].zone_tile)
                     if #storage.arrakis_spice_blows == 1 then storage.arrakis_last_blow = storage.arrakis_spice_blows[1].t_timeout end
                     table.remove(storage.arrakis_spice_blows, i)
                 end
