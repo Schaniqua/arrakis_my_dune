@@ -129,7 +129,7 @@ script.on_nth_tick(TICK_LOOP_SPICE, function()
         -- normalize to 0–100 range
         for _, d in ipairs(distances) do
             local normalized = (d.distance - min_dist) / range
-            d.signal_strength = math.floor((1 - normalized) * 99) + 1
+            d.signal_strength = math.floor((1 - normalized) * 50) + 50
         end
 
         -- sort by distance (so nearest appear leftmost)
