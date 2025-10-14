@@ -245,7 +245,6 @@ script.on_nth_tick(TICK_LOOP_SEISMIC, function()
             for i, spice_blow in ipairs(storage.arrakis_spice_blows) do
                 local t_remaining = spice_blow.t_timeout - game.tick
                 local t_remaining_sec = t_remaining / 60
-                game.print("danger: " .. t_remaining_sec)
                 if t_remaining_sec > 0 and t_remaining_sec <= WARNING_TIME then
                     local dist = distance(AAI_UNIT.position, spice_blow.coords)
                     if dist <= DETECTION_RADIUS then
