@@ -1,3 +1,5 @@
+--definition for the worm animation seen on spice blows destructions / random spawns
+
 local WORM_SCALE = 2 -- WORM SCALE SIZE
 local WORM_SHADOW_SCALE = WORM_SCALE * 0.85 -- WORM SHADOW SCALE SIZE, ~0.85 feels good
 local WORM_SHADOW_OFFSET = 7 -- SHADOW OFFSET TO WORM POSITION, shadow normally is 7 tiles too far left

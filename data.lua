@@ -6,8 +6,6 @@ icons = "__arrakis_my_dune__/graphics/icons/"
 
 -- require virtual signals for alerts, icons usw.
 require "prototypes.sandworms.virtual-signals"
-require "prototypes.sandworms.seismic-scanner"
-require "prototypes.sandworms.spice-scanner"
 
 --Planet and Environment Prototypes
 require "prototypes.planet.planet-arrakis-map-gen"
@@ -26,15 +24,15 @@ require "prototypes.items"
 require "prototypes.recipes"
 
 
---Enemy Prototypes
-require "prototypes.sandworms.worm-targeting"
+--Spice Blow Implementation and involved machine prototypes
 require "prototypes.sandworms.attack"
+require "prototypes.sandworms.worm-targeting"
 require "prototypes.sandworms.worm-protection"
+require "prototypes.sandworms.seismic-scanner"
+require "prototypes.sandworms.spice-scanner"
 
-
--- spice prototypes
+-- spice ore Prototype
 require "prototypes.spice.spice-ore"
-
 
 --Machine Prototypes
 require "prototypes.machines.dew-collector"

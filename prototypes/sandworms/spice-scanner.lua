@@ -1,8 +1,8 @@
 -- prototype definition for spice_scanner building
 local spice_scanner = util.table.deepcopy(data.raw["constant-combinator"]["constant-combinator"])
+table.insert(spice_scanner.flags, "get-by-unit-number")
 spice_scanner.name = "spice_scanner"
 spice_scanner.icon = "__base__/graphics/icons/constant-combinator.png"
-spice_scanner.flags = {"get-by-unit-number"}
 spice_scanner.minable = {
     mining_time = 0.1,
     result = "spice_scanner"

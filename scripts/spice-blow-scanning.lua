@@ -1,5 +1,6 @@
 local TICK_LOOP_SPICE = 120
 local TICK_LOOP_SEISMIC = 90
+local TICK_LOOP_ZONE_TILE_CHECK = 300
 
 local DETECTION_RADIUS = 30
 local WARNING_TIME = 20
@@ -67,6 +68,29 @@ script.on_event(defines.events.on_robot_built_entity, built_event, {{
     name = "seismic_scanner"
 }})
 
+
+-- removes zone tiles over ore entities that have been mined
+script.on_event(defines.events.on_resource_depleted, function(event)
+    local entity = event.entity
+    if entity.name == "spice-ore" then
+        local data = {}
+        data.surface_index = game.surfaces["arrakis"].index
+        data.force = game.forces["player"]
+        data.area = {
+            left_top = {
+                x = entity.position.x,
+                y = entity.position.y
+            },
+            right_bottom = {
+                x = entity.position.x,
+                y = entity.position.y
+            }
+        }
+        remote.call("aai-zones", "apply_zone_to_area", data)
+    end
+end
+)
+
 -- processing loop for spice scanner logic
 script.on_nth_tick(TICK_LOOP_SPICE, function()
     -- stop event loop immediately if storage table is empty
@@ -99,14 +123,13 @@ script.on_nth_tick(TICK_LOOP_SPICE, function()
 
         -- this is the actual scanning logic ------------------------------------------------------------------------
         if not storage.AAI_ZONES then goto EOL end
-
         local entity_pos = spice_scanner.position
         local distances = {}
 
         -- collect all used zones with their distances
         for tile_name, data in pairs(storage.AAI_ZONES) do
-            if data.used and data.reference_position then
-                local dist = distance(data.reference_position, entity_pos)
+            if data.used and data.references then
+                local dist = distance(data.references[1], entity_pos)
                 table.insert(distances, {
                     tile = tile_name,
                     distance = dist
@@ -139,7 +162,6 @@ script.on_nth_tick(TICK_LOOP_SPICE, function()
         -- populate logi group with active spice blows as virtual signals, signal value is 1-100 distance from scanner to spice blow
         local section = control_behavior.get_section(1)
         for i, data in ipairs(distances) do
-
             logi_section.set_slot((1 + i), {
                 value = {
                     type = "virtual",
@@ -210,21 +232,21 @@ script.on_nth_tick(TICK_LOOP_SEISMIC, function()
         end
 
         local AAI_Units = remote.call("aai-programmable-vehicles", "get_units")
- 
+
         goto EOL
         -- something here is sus, work for tomorrow
-        game.print(serpent.block(AAI_Units, {comment=false}))
+        game.print(serpent.block(AAI_Units, {
+            comment = false
+        }))
         for i, AAI_UNIT in ipairs(AAI_Units) do
             if AAI_UNIT.unit_id == UNIT_ID then
-                --game.print(serpent.block(AAI_UNIT))
-                --game.print(AAI_UNIT.vehicle.position)
+                -- game.print(serpent.block(AAI_UNIT))
+                -- game.print(AAI_UNIT.vehicle.position)
             end
         end
 
-        
         goto EOL
-        
-        
+
         local UNIT_REFERENCE = storage.unit.units[UNIT_ID]
         if UNIT_REFERENCE and UNIT_REFERENCE.valid then
             game.print(serpent.block("valid reference"))
@@ -253,3 +275,4 @@ script.on_nth_tick(TICK_LOOP_SEISMIC, function()
     end
 end
 )
+

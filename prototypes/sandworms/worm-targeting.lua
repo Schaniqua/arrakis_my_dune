@@ -1,4 +1,5 @@
--- Definition of what happens when a worm attack is triggered
+--definition of what happens when a lightning strike hits something
+--this is used to generate the random worm attacks via lightning strike, and it also fires an event that is used in some of my scripts
 local shared_action_delivery = {{
     type = "direct",
     action_delivery = {
