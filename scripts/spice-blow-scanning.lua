@@ -1,9 +1,9 @@
-local TICK_LOOP_SPICE = 120
-local TICK_LOOP_SEISMIC = 90
-local TICK_LOOP_ZONE_TILE_CHECK = 300
+local TICK_LOOP_SPICE = 120 -- ticks
+local TICK_LOOP_SEISMIC = 90 -- ticks
+local TICK_LOOP_ZONE_TILE_CHECK = 300 -- ticks
 
-local DETECTION_RADIUS = 30
-local WARNING_TIME = 20
+local DETECTION_RADIUS = 40 -- tiles
+local WARNING_TIME = 60 -- seconds
 
 local spice_blow_amount = {
     type = "virtual",
@@ -67,7 +67,6 @@ script.on_event(defines.events.on_robot_built_entity, built_event, {{
     filter = "name",
     name = "seismic_scanner"
 }})
-
 
 -- removes zone tiles over ore entities that have been mined
 script.on_event(defines.events.on_resource_depleted, function(event)
@@ -226,37 +225,29 @@ script.on_nth_tick(TICK_LOOP_SEISMIC, function()
         local INPUT_SIGNALS = seismic_scanner.get_signals(defines.wire_connector_id.combinator_input_red, defines.wire_connector_id.combinator_input_green)
         if INPUT_SIGNALS then
             UNIT_ID = get_signal_count(INPUT_SIGNALS, "signal-id")
-            game.print(serpent.block(UNIT_ID))
         else
-            UNIT_ID = 0
+            goto EOL
         end
 
-        local AAI_Units = remote.call("aai-programmable-vehicles", "get_units")
+        local max_danger = 0
+        local data = {}
+        data.surface_index = game.surfaces["arrakis"].index
+        data.signal_count = {
+            signal = {
+                type = "virtual",
+                name = "signal-id"
+            },
+            count = UNIT_ID
+        }
+        local AAI_UNIT = remote.call("aai-programmable-vehicles", "get_unit_by_signal", data)
 
-        goto EOL
-        -- something here is sus, work for tomorrow
-        game.print(serpent.block(AAI_Units, {
-            comment = false
-        }))
-        for i, AAI_UNIT in ipairs(AAI_Units) do
-            if AAI_UNIT.unit_id == UNIT_ID then
-                -- game.print(serpent.block(AAI_UNIT))
-                -- game.print(AAI_UNIT.vehicle.position)
-            end
-        end
-
-        goto EOL
-
-        local UNIT_REFERENCE = storage.unit.units[UNIT_ID]
-        if UNIT_REFERENCE and UNIT_REFERENCE.valid then
-            game.print(serpent.block("valid reference"))
-
+        if AAI_UNIT then
             for i, spice_blow in ipairs(storage.arrakis_spice_blows) do
-                local t_remaining = spice_blow.t_timeout - (game.tick - spice_blow.t_created)
-                local t_remaining_sec = t_remaining / TICK_LOOP_SEISMIC
-
+                local t_remaining = spice_blow.t_timeout - game.tick
+                local t_remaining_sec = t_remaining / 60
+                game.print("danger: " .. t_remaining_sec)
                 if t_remaining_sec > 0 and t_remaining_sec <= WARNING_TIME then
-                    local dist = distance(UNIT_REFERENCE.position, spice_blow.position)
+                    local dist = distance(AAI_UNIT.position, spice_blow.coords)
                     if dist <= DETECTION_RADIUS then
                         -- linear scale: 20s -> 0 danger, 0s -> 100 danger
                         local danger = 100 * (1 - (t_remaining_sec / WARNING_TIME))
@@ -266,9 +257,45 @@ script.on_nth_tick(TICK_LOOP_SEISMIC, function()
             end
             -- logi_section.group = "SIGNAL OUTPUT" no group here, group will sync between combinators, we dont want that
             logi_section.set_slot(1, {
-                value = spice_blow_danger,
+                value = {
+                    type = "virtual",
+                    name = "signal-A",
+                    quality = "normal",
+                    comparator = "="
+                },
                 min = max_danger
             })
+
+            local colors = {
+                ["signal-red"] = {
+                    amount = 0,
+                    slot = 2
+                },
+                ["signal-green"] = {
+                    amount = 0,
+                    slot = 3
+                }
+            }
+            colors["signal-red"].amount   = math.min(255, 255 * (max_danger / 50))
+            colors["signal-green"].amount = math.min(255, math.max(0, 255 * (1 - ((max_danger - 50) / 50))))
+
+            for color, data in pairs(colors) do
+                if data.amount == 0 then
+                    logi_section.clear_slot(data.slot)
+                else
+                    logi_section.set_slot(data.slot, {
+                        value = {
+                            type = "virtual",
+                            name = color,
+                            quality = "normal",
+                            comparator = "="
+                        },
+                        min = data.amount
+                    })
+                end
+
+            end
+
         end
 
         ::EOL:: -- jump to End Of Loop, dont come @ me because i use goto

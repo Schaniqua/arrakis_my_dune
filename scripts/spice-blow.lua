@@ -7,7 +7,7 @@ local HIGH_TIME_BLOW = 3 -- minutes max
 local LOW_TIME_WORM = 3 -- minutes min until worm attacks the spice
 local HIGH_TIME_WORM = 5 -- minutes max
 
-local MAX_PARALLEL_SPICE_BLOWS = 5 -- as it says on the tin, max 11 because i only added 11 AAI zones to the dict
+local MAX_PARALLEL_SPICE_BLOWS = 1 -- as it says on the tin, max 11 because i only added 11 AAI zones to the dict
 
 local SPICE_BLOW_SAFETY_ZONE_SIZE = 0
 
