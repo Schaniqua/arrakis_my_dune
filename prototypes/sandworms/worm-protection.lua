@@ -1,3 +1,5 @@
+--invisible lightning attractor used for rocky plateau protection, vehicle protection, etc.
+
 data:extend(
   -- only difference between these two prototypes is where they are used and whether they are indexed into .unit_number
 {{

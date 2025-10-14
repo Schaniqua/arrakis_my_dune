@@ -18,12 +18,7 @@ script.on_nth_tick(TICK_LOOP, function()
     --Check if Arrakis even exists
     if game.surfaces["arrakis"] then
         -- this is not optimised at all but can be remade later if needed, low hanging fruit changing find_entities to references in memory
-        for key, entity in pairs(game.surfaces["arrakis"].find_entities_filtered({name="water-condenser"})) do
-            --game.print("test")
-            --game.print(key)
-            --game.print(entity.position)
-            --game.print(entity)
-            
+        for key, entity in pairs(game.surfaces["arrakis"].find_entities_filtered({name="water-condenser"})) do  
             if (game.surfaces["arrakis"].get_pollution(entity.position)) > config.MINIMUM_POLLUTION_FOR_OPERATION then
                 entity.disabled_by_script = false
                 entity.custom_status = {
@@ -56,9 +51,6 @@ script.on_nth_tick(ticks, function()
             arrakis_night = true
             -- When nighttime add pollution to generated chunk-------------------------------------------------------------------------------------
             for chunk in game.surfaces["arrakis"].get_chunks() do
-                -- game.print("x: " .. chunk.x .. ", y: " .. chunk.y)
-                -- game.print("area: " .. serpent.line(chunk.area))
-                -- game.print("test: " .. chunk.area.left_top.x)
                 if game.surfaces["arrakis"].get_pollution({chunk.area.left_top.x, chunk.area.left_top.y}) < config.MAX_POLLUTION_PER_NIGHT then
                     game.surfaces["arrakis"].pollute({chunk.area.left_top.x, chunk.area.left_top.y}, config.ADDED_POLLUTION_PER_CHUNK, humidity)
                 end

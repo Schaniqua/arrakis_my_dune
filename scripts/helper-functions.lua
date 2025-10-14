@@ -1,14 +1,28 @@
 local helper = {}
 
+-- helper function for freeing aai zone tile
 function helper.free_zone_tile(tile_name)
     if not tile_name then return end
-    local found_entities = game.surfaces["arrakis"].find_entities_filtered {
-        name = tile_name
-    }
-
-    for _, ent in ipairs(found_entities) do if ent and ent.valid then ent.destroy() end end
+    for _, zone_tile_pos in ipairs(storage.AAI_ZONES[tile_name].references) do
+        if zone_tile_pos and zone_tile_pos.x and zone_tile_pos.y then
+            local data = {}
+            data.surface_index = game.surfaces["arrakis"].index
+            data.force = game.forces["player"]
+            data.area = {
+                left_top = {
+                    x = zone_tile_pos.x,
+                    y = zone_tile_pos.y
+                },
+                right_bottom = {
+                    x = zone_tile_pos.x,
+                    y = zone_tile_pos.y
+                }
+            }
+            remote.call("aai-zones","apply_zone_to_area", data)
+        end
+    end
     storage.AAI_ZONES[tile_name].used = false
-    storage.AAI_ZONES[tile_name].reference_position = {}
+    storage.AAI_ZONES[tile_name].references = {}
 end
 
 
@@ -18,51 +32,52 @@ function helper.create_ore_patch(pos, size, ore, amount)
     local ore = ore or "spice-ore"
     local base_amount = amount or 200
     local zone_tile_to_apply
+    local reference_tiles
 
     storage.AAI_ZONES = storage.AAI_ZONES or {
         ["zone-box-blue"] = {
             used = false,
-            reference_position = {}
+            references = {}
         },
         ["zone-box-cyan"] = {
             used = false,
-            reference_position = {}
+            references = {}
         },
         ["zone-box-green"] = {
             used = false,
-            reference_position = {}
+            references = {}
         },
         ["zone-box-magenta"] = {
             used = false,
-            reference_position = {}
+            references = {}
         },
         ["zone-box-olive"] = {
             used = false,
-            reference_position = {}
+            references = {}
         },
         ["zone-box-orange"] = {
             used = false,
-            reference_position = {}
+            references = {}
         },
         ["zone-box-purple"] = {
             used = false,
-            reference_position = {}
+            references = {}
         },
         ["zone-box-red"] = {
             used = false,
-            reference_position = {}
+            references = {}
         },
         ["zone-box-teal"] = {
             used = false,
-            reference_position = {}
+            references = {}
         },
         ["zone-box-white"] = {
             used = false,
-            reference_position = {}
+            references = {}
         },
         ["zone-box-yellow"] = {
             used = false,
-            reference_position = {}
+            references = {}
         }
     }
 
@@ -70,13 +85,13 @@ function helper.create_ore_patch(pos, size, ore, amount)
         for tile_name, data in pairs(storage.AAI_ZONES) do
             if not data.used then
                 data.used = true
-                data.reference_position = pos
                 zone_tile_to_apply = tile_name
                 break
             end
         end
     end
 
+    reference_tiles = {}
     for dx = -patch_size, patch_size do
         for dy = -patch_size, patch_size do
             local distance = math.sqrt(dx * dx + dy * dy)
@@ -88,16 +103,29 @@ function helper.create_ore_patch(pos, size, ore, amount)
                     position = {pos.x + dx, pos.y + dy}
                 }
                 if ore == "spice-ore" then
-                    game.surfaces["arrakis"].create_entity {
-                        name = zone_tile_to_apply,
-                        force = "neutral",
-                        position = {pos.x + dx, pos.y + dy}
+                    local data = {}
+                    local pos = {
+                        x = pos.x + dx,
+                        y = pos.y + dy
                     }
+                    data.surface_index = game.surfaces["arrakis"].index
+                    data.force = game.forces["player"]
+                    data.type = zone_tile_to_apply
+                    data.area = {
+                        left_top = pos,
+                        right_bottom = pos
+                    }
+                    remote.call("aai-zones","apply_zone_to_area", data)
+                    table.insert(reference_tiles, pos)
+
                 end
             end
         end
     end
-    if ore == "spice-ore" then return zone_tile_to_apply end
+    if ore == "spice-ore" then
+        storage.AAI_ZONES[zone_tile_to_apply].references = reference_tiles
+        return zone_tile_to_apply
+    end
 end
 
 

@@ -1,3 +1,5 @@
+--defines the spice ore prototype used for dynamic spice blow resource spawns
+
 data:extend({
   {
     type = "resource-category",
